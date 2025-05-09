@@ -1,20 +1,24 @@
-
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-
+const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 
-
 dotenv.config();
+const PORT = process.env.PORT || 5000;
 
 const app = express();
+app.use(cors());
 app.use(express.json()); 
 
 const server = http.createServer(app);
-const io = socketIo(server);
-
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:5173", // Vite's default port
+    methods: ["GET", "POST"]
+  }
+});
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -23,10 +27,8 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log(err));
 
-
 app.use('/api/message', require('./routes/messageRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
-
 
 io.on('connection', (socket) => {
   console.log('New client connected');
@@ -41,12 +43,6 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

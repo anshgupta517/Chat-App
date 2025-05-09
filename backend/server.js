@@ -6,13 +6,14 @@ const dotenv = require('dotenv');
 const http = require('http');
 const socketIo = require('socket.io');
 
-const server = http.createServer(app);
-const io = socketIo(server);
 
 dotenv.config();
 
 const app = express();
 app.use(express.json()); 
+
+const server = http.createServer(app);
+const io = socketIo(server);
 
 
 mongoose.connect(process.env.MONGO_URI, {

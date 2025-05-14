@@ -11,6 +11,7 @@ const Chat = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [chats, setChats] = useState([]);
   const socketRef = useRef();
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
@@ -34,6 +35,17 @@ const Chat = () => {
       setMessages(prev => [...prev, message]);
     });
 
+    socketRef.current.on('newChat', (chat) => {
+      setChats(prev => {
+        // Check if chat already exists
+        const exists = prev.some(c => c._id === chat._id);
+        if (!exists) {
+          return [chat, ...prev];
+        }
+        return prev;
+      });
+    });
+
     // Fetch initial data
     fetchUsers();
     fetchChats();
@@ -43,11 +55,24 @@ const Chat = () => {
     };
   }, [navigate]);
 
+  // Effect to handle chat room joining/leaving
+  useEffect(() => {
+    if (selectedChat) {
+      socketRef.current?.emit('join chat', selectedChat._id);
+    }
+    return () => {
+      if (selectedChat) {
+        socketRef.current?.emit('leave chat', selectedChat._id);
+      }
+    };
+  }, [selectedChat]);
+
   const fetchUsers = async () => {
     try {
       const { data } = await axios.get('/api/user');
       setUsers(data);
     } catch (error) {
+      console.error('Error fetching users:', error);
       setError('Failed to fetch users');
     }
   };
@@ -55,12 +80,14 @@ const Chat = () => {
   const fetchChats = async () => {
     try {
       const { data } = await axios.get('/api/chat');
-      if (data.length > 0) {
+      setChats(data);
+      if (data && data.length > 0) {
         setSelectedChat(data[0]);
         fetchMessages(data[0]._id);
       }
       setLoading(false);
     } catch (error) {
+      console.error('Error fetching chats:', error);
       setError('Failed to fetch chats');
       setLoading(false);
     }
@@ -71,7 +98,19 @@ const Chat = () => {
       const { data } = await axios.get(`/api/message/${chatId}`);
       setMessages(data);
     } catch (error) {
+      console.error('Error fetching messages:', error);
       setError('Failed to fetch messages');
+    }
+  };
+
+  const handleUserSelect = async (user) => {
+    try {
+      const { data } = await axios.post('/api/chat', { userId: user._id });
+      setSelectedChat(data);
+      fetchMessages(data._id);
+    } catch (error) {
+      console.error('Error creating chat:', error);
+      setError('Failed to create chat');
     }
   };
 
@@ -85,10 +124,14 @@ const Chat = () => {
         chatId: selectedChat._id,
       });
 
-      socketRef.current.emit('sendMessage', data);
+      // Add message to local state immediately
       setMessages(prev => [...prev, data]);
       setNewMessage('');
+
+      // Emit message through socket
+      socketRef.current.emit('sendMessage', data);
     } catch (error) {
+      console.error('Error sending message:', error);
       setError('Failed to send message');
     }
   };
@@ -112,17 +155,24 @@ const Chat = () => {
           <h3>Chats</h3>
         </div>
         <div className="chat-list">
-          {users.map(user => (
+          {chats.map(chat => (
             <div
-              key={user._id}
-              className={`chat-item ${selectedChat?._id === user._id ? 'active' : ''}`}
-              onClick={() => setSelectedChat(user)}
+              key={chat._id}
+              className={`chat-item ${selectedChat?._id === chat._id ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedChat(chat);
+                fetchMessages(chat._id);
+              }}
             >
               <div className="user-info">
-                <img src={user.pic} alt={user.name} className="user-avatar" />
+                <img 
+                  src={chat.users.find(u => u._id !== localStorage.getItem('userId'))?.pic} 
+                  alt={chat.users.find(u => u._id !== localStorage.getItem('userId'))?.name} 
+                  className="user-avatar" 
+                />
                 <div className="user-details">
-                  <h4>{user.name}</h4>
-                  <p>{user.email}</p>
+                  <h4>{chat.users.find(u => u._id !== localStorage.getItem('userId'))?.name}</h4>
+                  <p>{chat.users.find(u => u._id !== localStorage.getItem('userId'))?.email}</p>
                 </div>
               </div>
             </div>
@@ -135,8 +185,12 @@ const Chat = () => {
           <>
             <div className="chat-header">
               <div className="chat-user-info">
-                <img src={selectedChat.pic} alt={selectedChat.name} className="user-avatar" />
-                <h3>{selectedChat.name}</h3>
+                <img 
+                  src={selectedChat.users.find(u => u._id !== localStorage.getItem('userId'))?.pic} 
+                  alt={selectedChat.users.find(u => u._id !== localStorage.getItem('userId'))?.name} 
+                  className="user-avatar" 
+                />
+                <h3>{selectedChat.users.find(u => u._id !== localStorage.getItem('userId'))?.name}</h3>
               </div>
             </div>
 

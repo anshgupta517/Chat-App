@@ -1,9 +1,26 @@
+const mongoose = require("mongoose");
 
-import express from 'express';
-const { allMessages, sendMessage } = require('../controllers/messageControllers');
-const router = express.Router();
+const messageSchema = mongoose.Schema(
+  {
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    content: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    chat: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-router.get('/:chatId', allMessages);
-router.post('/', sendMessage);
-
-module.exports = router;
+module.exports = mongoose.model("Message", messageSchema);

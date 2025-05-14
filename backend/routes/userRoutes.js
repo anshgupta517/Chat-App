@@ -12,16 +12,18 @@ const {
   getUserById
 } = require('../controllers/userControllers');
 
-// Public routes
+// Public routes - must come first
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // Protected routes
-router.get('/', protect, getAllUsers);
+router.get('/search', protect, searchUsers);
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
 router.delete('/profile', protect, deleteUser);
-router.get('/search', protect, searchUsers);
+router.get('/', protect, getAllUsers);
+
+// Protected routes with parameters - must come last
 router.get('/:id', protect, getUserById);
 
 module.exports = router;

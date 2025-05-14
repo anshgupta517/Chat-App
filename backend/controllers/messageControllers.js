@@ -3,7 +3,7 @@ const Message = require("../models/messageModel");
 const User = require("../models/userModel");
 const Chat = require("../models/chatModel");
 
-// Get all messages for a chat
+
 const allMessages = asyncHandler(async (req, res) => {
   try {
     const messages = await Message.find({ chat: req.params.chatId })
@@ -16,7 +16,7 @@ const allMessages = asyncHandler(async (req, res) => {
   }
 });
 
-// Create new message
+
 const sendMessage = asyncHandler(async (req, res) => {
   const { content, chatId } = req.body;
 
@@ -34,7 +34,7 @@ const sendMessage = asyncHandler(async (req, res) => {
   try {
     var message = await Message.create(newMessage);
 
-    // Populate all necessary fields
+    
     message = await Message.findById(message._id)
       .populate("sender", "name pic email")
       .populate({
@@ -47,7 +47,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
 
-    // Emit socket event to the chat room
+    
     const io = req.app.get('io');
     io.to(chatId).emit('message', message);
 

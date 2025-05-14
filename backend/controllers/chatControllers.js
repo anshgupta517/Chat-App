@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
 
-// Create or fetch one-to-one chat
+
 const accessChat = asyncHandler(async (req, res) => {
   const { userId } = req.body;
 
@@ -42,7 +42,7 @@ const accessChat = asyncHandler(async (req, res) => {
         "-password"
       );
       
-      // Emit new chat event to both users
+      
       const io = req.app.get('io');
       FullChat.users.forEach(user => {
         io.to(user._id.toString()).emit('newChat', FullChat);
@@ -56,7 +56,7 @@ const accessChat = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all chats for a user
+
 const fetchChats = asyncHandler(async (req, res) => {
   try {
     Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })

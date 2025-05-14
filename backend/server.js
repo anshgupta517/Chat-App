@@ -59,6 +59,9 @@ io.use((socket, next) => {
 io.on('connection', (socket) => {
   console.log('User connected:', socket.userId);
 
+  // Join user's personal room
+  socket.join(socket.userId);
+
   socket.on('join chat', (chatId) => {
     socket.join(chatId);
     console.log('User joined chat:', chatId);
@@ -67,17 +70,6 @@ io.on('connection', (socket) => {
   socket.on('leave chat', (chatId) => {
     socket.leave(chatId);
     console.log('User left chat:', chatId);
-  });
-
-  socket.on('sendMessage', (message) => {
-    const chat = message.chat;
-    if (!chat.users) return;
-
-    // Emit to all users in the chat except the sender
-    chat.users.forEach(user => {
-      if (user._id === message.sender._id) return;
-      io.to(user._id.toString()).emit('message', message);
-    });
   });
 
   socket.on('disconnect', () => {

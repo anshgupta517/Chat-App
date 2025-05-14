@@ -32,12 +32,14 @@ const Chat = () => {
 
     // Socket event listeners
     socketRef.current.on('message', (message) => {
-      setMessages(prev => [...prev, message]);
+      // Only add message if it's not from the current user
+      if (message.sender._id !== localStorage.getItem('userId')) {
+        setMessages(prev => [...prev, message]);
+      }
     });
 
     socketRef.current.on('newChat', (chat) => {
       setChats(prev => {
-        // Check if chat already exists
         const exists = prev.some(c => c._id === chat._id);
         if (!exists) {
           return [chat, ...prev];
@@ -58,10 +60,12 @@ const Chat = () => {
   // Effect to handle chat room joining/leaving
   useEffect(() => {
     if (selectedChat) {
+      console.log('Joining chat:', selectedChat._id);
       socketRef.current?.emit('join chat', selectedChat._id);
     }
     return () => {
       if (selectedChat) {
+        console.log('Leaving chat:', selectedChat._id);
         socketRef.current?.emit('leave chat', selectedChat._id);
       }
     };
@@ -127,9 +131,6 @@ const Chat = () => {
       // Add message to local state immediately
       setMessages(prev => [...prev, data]);
       setNewMessage('');
-
-      // Emit message through socket
-      socketRef.current.emit('sendMessage', data);
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Failed to send message');

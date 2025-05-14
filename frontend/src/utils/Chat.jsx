@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import axios from '../utils/axios';
+import axios from './axios';
 import io from 'socket.io-client';
 
 const Chat = () => {
@@ -9,7 +9,7 @@ const Chat = () => {
   const chatId = 'someChatId'; 
 
 
-  const socket = io('http://localhost:5000'); // Adjust based on your backend URL
+  const socket = io('http://localhost:5000'); 
 
   useEffect(() => {
     socket.on('message', (message) => {
@@ -34,7 +34,7 @@ const Chat = () => {
     e.preventDefault();
     if (!newMessage) return;
 
-    const messageData = { content: newMessage, chatId, sender: { name: 'Your Name' } }; // Replace with actual sender info
+    const messageData = { content: newMessage, chatId, sender: { name: 'Your Name' } }; 
     socket.emit('sendMessage', messageData);
     setNewMessage('');
   };

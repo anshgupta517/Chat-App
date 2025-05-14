@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from '../utils/axios';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
-import './Chat.css'
+import './styles/Chat.css'
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -23,16 +23,16 @@ const Chat = () => {
       return;
     }
 
-    // Initialize socket connection
+    
     socketRef.current = io('http://localhost:5000', {
       auth: {
         token
       }
     });
 
-    // Socket event listeners
+    
     socketRef.current.on('message', (message) => {
-      // Only add message if it's not from the current user
+      
       if (message.sender._id !== localStorage.getItem('userId')) {
         setMessages(prev => [...prev, message]);
       }
@@ -48,7 +48,7 @@ const Chat = () => {
       });
     });
 
-    // Fetch initial data
+    
     fetchUsers();
     fetchChats();
 
@@ -57,7 +57,7 @@ const Chat = () => {
     };
   }, [navigate]);
 
-  // Effect to handle chat room joining/leaving
+  
   useEffect(() => {
     if (selectedChat) {
       console.log('Joining chat:', selectedChat._id);
@@ -128,7 +128,7 @@ const Chat = () => {
         chatId: selectedChat._id,
       });
 
-      // Add message to local state immediately
+      
       setMessages(prev => [...prev, data]);
       setNewMessage('');
     } catch (error) {

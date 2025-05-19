@@ -1,6 +1,10 @@
 
 # Chat-App
 
+The Chat-App repository is a full-stack real-time chat application built with the MERN stack (MongoDB, Express.js, React, Node.js) and Socket.IO. It allows users to register, log in, create individual and group chats, and exchange messages in real-time.
+System Architecture
+The application follows a client-server architecture with clear separation between frontend and backend components. Real-time communication is facilitated through WebSockets using Socket.IO alongside traditional HTTP requests for data operations.
+
 ## 🛠️ Installation
 
 ### Prerequisites

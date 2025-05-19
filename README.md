@@ -6,14 +6,6 @@ System Architecture
 
 - The application follows a client-server architecture with clear separation between frontend and backend components. Real-time communication is facilitated through WebSockets using Socket.IO alongside traditional HTTP requests for data operations.
 
-| Component               | Technologies                                 |
-|:----------------------- |:-------------------------------------------- |
-| Frontend                | React, React Router, Axios, Socket.IO Client |
-| Backend                 | Node.js, Express.js, Socket.IO, JWT          |
-| Database                | MongoDB with Mongoose ODM                    |
-| Authentication          | JSON Web Tokens (JWT)                        |
-| Real-time Communication | Socket.IO                                    |
-
 
 ## 🛠️ Installation
 
